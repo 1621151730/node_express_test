@@ -9,6 +9,8 @@ import Admin from "../controller/admin/admin"
 
 const router = express.Router();
 
-router.get('/login', Admin.login );
+router.get("/login", Admin.login );
+router.post("/register",Admin.register);
+router.get("/singout",Admin.singout);
 
 export default router;

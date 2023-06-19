@@ -7,6 +7,8 @@
 import express from "express";
 import router from "./routes/index.js";
 import chalk from 'chalk';
+import session from 'express-session';
+import connectMongo from 'connect-mongo';
 import db from './mongodb/db.js'; //引入了，在进行db的连接
 
 const app = express();
@@ -14,7 +16,7 @@ const app = express();
 // 使用配置
 const config = require("config-lite")("./config");
 
-// 給route路由送去app参数对象
+// 給router路由送去app参数对象
 router(app);
 db(config);
 // 安排请求头
@@ -32,6 +34,19 @@ app.all("*",(req, res, next)=>{
     next();
 	}
 })
+
+const MongoStore = connectMongo(session);
+// 长连接会话
+app.use(session({
+  name: config.session.name,
+	secret: config.session.secret,
+	resave: true,
+	saveUninitialized: false,
+	cookie: config.session.cookie,
+	store: new MongoStore({
+  	url: config.url
+	})
+}))
 
 app.get("/",(req, res, next)=>{
   res.send("first run Node");
