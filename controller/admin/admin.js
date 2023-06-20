@@ -9,10 +9,12 @@ import crypto from "crypto";
 import dtime from 'time-formater'
 import formidable from "formidable";
 import AdminModel from "../../models/admin/admin.js";
+import AddressComponent from "../../prototype/AddressComponent.js";
 
-class Admin{
+class Admin extends AddressComponent{
 
   constructor(){
+		super();
     // 给参数绑定一些自带的函数，比如encryption()、Md5()
     this.login = this.login.bind(this);
     this.register = this.register.bind(this);
@@ -66,8 +68,11 @@ class Admin{
           })
         }else{
           // 是将用户的管理员ID（admin.id）保存到会话（session）中
-          req.session.admin_id = admin.id;
-          res.send(successSendMessage("登录成功"))
+          req.session.admin_id = admin.id; // 将 admin_id 存储在会话对象中
+          res.send({
+            status:200,
+            success: "登录成功"
+          })
         }
       } catch (err) {
         console.log('登录管理员失败', err);
@@ -83,9 +88,7 @@ class Admin{
 
   async register(req, res, next){
     const from = formidable.IncomingForm();
-
     from.parse(req, async(err, fields, files) => {
-
       if(err){
         res.send({
           status:0,
@@ -114,18 +117,16 @@ class Admin{
 
       try {
         const admin = await AdminModel.findOne({user_name});
-        console.log(admin);
         if(admin){
           console.log('该用户已经存在');
-					res.send( {
+					res.send({
             status:0,
             type: "USER_HAS_EXIST",
             message: "该用户已经存在"
           });
         }else{
           const adminTip = status == 1 ? "管理员" : "超级管理员";
-          // const admin_id = await this.getId("admin_id");
-          const admin_id = 1008612;
+          const admin_id = await this.getId("admin_id");
           const newpassword = this.encryption(password);
           const newAdmin = {
             user_name: user_name,
@@ -135,6 +136,7 @@ class Admin{
 						admin: adminTip,
 						status: status,
           }
+
           await AdminModel.create(newAdmin);
           req.session.admin_id = admin_id;
           res.send({
@@ -154,11 +156,12 @@ class Admin{
   }
 
   async singout(req, res, next){
-    console.log(chalk.red(req.session));
+    console.log(chalk.red(req.session.admin_id));
     try {
       delete req.session.admin_id;
       res.send({
 				status: 1,
+        admin_id: req.session.admin_id,
 				success: '退出成功'
 			})
     } catch (err) {
@@ -166,6 +169,78 @@ class Admin{
 			res.send({
 				status: 0,
 				message: '退出失败'
+			})
+    }
+  }
+
+  async getAllAdmin(req, res ,next){
+    const {page_size = 20, page_num = 0} = req.query;
+
+    try {
+      // sort({id: 1}) 排序，根据什么去排序
+      //  '-_id -password' 不返回这些属性
+      const allAdmin = await AdminModel.find({}, '-_id -password').sort({id: 1}).skip(Number(page_num)).limit(Number(page_size));
+      res.send({
+        status: 1,
+        data: allAdmin
+      })
+    } catch (err) {
+      console.log('获取用户列表失败', err);
+      res.send({
+        status: 0,
+				type: 'ERROR_GET_ADMIN_LIST',
+				message: '获取用户列表失败'
+      })
+    }
+
+  }
+
+  async getAdminCount(req, res, next){
+    try {
+      const count = await AdminModel.count();
+      res.send({
+				status: 1,
+				count,
+			})
+    } catch (err) {
+      console.log("获取用户数量",err);
+      res.send({
+        status: 0,
+				type: 'ERROR_GET_ADMIN_COUNT',
+				message: '获取用户数量失败'
+      })
+    }
+  }
+
+  async getAdminInfo(req, res, next){
+    const admin_id = req.session.admin_id;
+    if(!admin_id || !Number(admin_id)){
+      res.send({
+				status: 0,
+				type: 'ERROR_SESSION',
+				message: '获取管理员信息失败'
+			})
+			return
+    }
+
+    try {
+      const info = await AdminModel.findOne({id: admin_id}, '-_id -__v -password');
+
+      if(!info){
+        throw new Error('未找到当前管理员')
+      }else{
+        res.send({
+					status: 1,
+					data: info
+				})
+      }
+
+    } catch (err) {
+      console.log('获取管理员信息失败');
+      res.send({
+				status: 0,
+				type: 'GET_ADMIN_INFO_FAILED',
+				message: '获取管理员信息失败'
 			})
     }
   }

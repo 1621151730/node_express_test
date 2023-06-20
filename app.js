@@ -16,9 +16,6 @@ const app = express();
 // 使用配置
 const config = require("config-lite")("./config");
 
-// 給router路由送去app参数对象
-router(app);
-db(config);
 // 安排请求头
 app.all("*",(req, res, next)=>{
   const { origin, Origin, referer, Referer} = req.headers;
@@ -48,9 +45,10 @@ app.use(session({
 	})
 }))
 
-app.get("/",(req, res, next)=>{
-  res.send("first run Node");
-})
+// 給router路由送去app参数对象
+router(app);
+db(config);
+
 
 app.listen(config.port,()=>{
   console.log(
