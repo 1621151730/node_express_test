@@ -16,6 +16,8 @@ const app = express();
 // 使用配置
 const config = require("config-lite")("./config");
 
+app.use(express.json());
+
 // 安排请求头
 app.all("*",(req, res, next)=>{
   const { origin, Origin, referer, Referer} = req.headers;

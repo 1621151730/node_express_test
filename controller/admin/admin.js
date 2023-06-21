@@ -18,6 +18,8 @@ class Admin extends AddressComponent{
     // 给参数绑定一些自带的函数，比如encryption()、Md5()
     this.login = this.login.bind(this);
     this.register = this.register.bind(this);
+		this.encryption = this.encryption.bind(this)
+		this.updateAvatar = this.updateAvatar.bind(this)
   }
 
   async login(req, res, next){
@@ -87,8 +89,8 @@ class Admin extends AddressComponent{
   }
 
   async register(req, res, next){
-    const from = formidable.IncomingForm();
-    from.parse(req, async(err, fields, files) => {
+    const form = formidable.IncomingForm();
+    form.parse(req, async(err, fields, files) => {
       if(err){
         res.send({
           status:0,
@@ -243,6 +245,48 @@ class Admin extends AddressComponent{
 				message: '获取管理员信息失败'
 			})
     }
+  }
+
+  async updateAvatar(req, res, next){
+    const form = formidable.IncomingForm();
+
+    // form.parse(req, async (err, fields, files)=>{
+      // const {admin_id} = fields;
+      let admin_id = 41222;
+      // const admin_id = req.body.admin_id;
+      if(!admin_id || !Number(admin_id)){
+        console.log("admin_id参数错误", admin_id);
+
+        res.send({
+          status: 0,
+          type: 'ERROR_ADMINID',
+          message: 'admin_id参数错误',
+        })
+        return
+      }
+
+      try {
+        // 先保存好图片，在获取图片的地址
+        const image_path = await this.getPath(req);
+        console.log(chalk.red(image_path));
+        // 把地址保存到user的信息中
+        await AdminModel.findOneAndUpdate({id:admin_id},{$set:{avatar: image_path}});
+        res.send({
+          status: 1,
+          image_path,
+        })
+        return
+      } catch (err) {
+        console.log('上传图片失败', err);
+        res.send({
+          status: 0,
+          type: 'ERROR_UPLOAD_IMG',
+          message: '上传图片失败'
+        })
+        return
+      }
+    // })
+
   }
 
   encryption(password){

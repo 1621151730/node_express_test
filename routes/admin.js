@@ -9,8 +9,10 @@ import Admin from "../controller/admin/admin"
 
 const router = express.Router();
 
-router.get("/login", Admin.login);
 router.post("/register",Admin.register);
+router.post("/update_avatar",Admin.updateAvatar);
+
+router.get("/login", Admin.login);
 router.get("/singout",Admin.singout);
 router.get("/get_all_admin",Admin.getAllAdmin);
 router.get("/get_admin_count",Admin.getAdminCount);
