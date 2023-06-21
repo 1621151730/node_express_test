@@ -250,9 +250,14 @@ class Admin extends AddressComponent{
   async updateAvatar(req, res, next){
     const form = formidable.IncomingForm();
 
-    // form.parse(req, async (err, fields, files)=>{
-      // const {admin_id} = fields;
-      let admin_id = 41222;
+    form.uploadDir = './public/img';
+
+    form.parse(req, async (err, fields, files)=>{
+
+      const {admin_id} = fields;
+      // const admin_id = req.params.admin_id;
+      console.log("admin_idadmin_id",admin_id);
+      // let admin_id = 41222;
       // const admin_id = req.body.admin_id;
       if(!admin_id || !Number(admin_id)){
         console.log("admin_id参数错误", admin_id);
@@ -267,7 +272,7 @@ class Admin extends AddressComponent{
 
       try {
         // 先保存好图片，在获取图片的地址
-        const image_path = await this.getPath(req);
+        const image_path = await this.getPath(files);
         console.log(chalk.red(image_path));
         // 把地址保存到user的信息中
         await AdminModel.findOneAndUpdate({id:admin_id},{$set:{avatar: image_path}});
@@ -285,7 +290,7 @@ class Admin extends AddressComponent{
         })
         return
       }
-    // })
+    })
 
   }
 

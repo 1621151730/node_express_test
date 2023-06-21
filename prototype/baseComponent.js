@@ -37,13 +37,14 @@ export default class BaseComponent{
     }
   }
 
-  async getPath(req, res){
-    return new Promise((resolve, reject) => {
-      const form = formidable.IncomingForm();
-      // 上传了图片了
-      form.uploadDir = './public/img';
+  async getPath(files){
+    return new Promise( async (resolve, reject) => {
 
-      form.parse(req, async (err, fields, files) => {
+      // const form = formidable.IncomingForm();
+      // 上传了图片了
+      // form.uploadDir = './public/img';
+
+      // form.parse(req, async (err, fields, files) => {
 
         let img_id;
         try {
@@ -97,6 +98,6 @@ export default class BaseComponent{
 					reject('保存图片失败')
         }
       })
-    })
+    // })
   }
 }
