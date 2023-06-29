@@ -7,7 +7,7 @@
 import mongoose from "mongoose";
 import categoryData from '../../InitData/category'
 
-const Schema = new mongoose.Schema;
+const Schema = mongoose.Schema;
 
 const categorySchema = new Schema({
   count: Number,
@@ -55,12 +55,16 @@ const Category = mongoose.model("Category", categorySchema);
 
 // 如果数据库没有值，就新创建数据
 
-Category.findOne((err, data) => {
-  if (!data) {
-    for (let i = 0; i < categoryData.length; i++) {
-      Category.create(categoryData[i]);
+Category.findOne()
+  .then(res => {
+    if (!res) {
+      for (let i = 0; i < categoryData.length; i++) {
+        Category.create(categoryData[i]);
+      }
     }
-  }
-})
+  })
+  .catch(err => {
+    console.log(err);
+  })
 
 export default Category;

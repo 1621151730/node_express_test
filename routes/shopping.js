@@ -12,6 +12,7 @@ import express from "express";
 const router = express.Router();
 // router.post("地址", 中间件函数, 方法);
 router.post("/add_shop", Check.checkAdmin, Shop.addShop);
-
+router.get('/restaurants', Shop.getRestaurants);
+router.get('/restaurants/count', Shop.getShopCount);
 
 export default router;

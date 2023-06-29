@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import activityData from '../../InitData/activity';
 
-const Schema = new mongoose.Schema;
+const Schema = mongoose.Schema;
 
 const activitySchema = new Schema({
   description: String,
@@ -16,12 +16,16 @@ activitySchema.index({ index: 1 });
 
 const Activity = mongoose.model("Activity", activitySchema);
 
-Activity.findOne((err, data) => {
-  if (!data) {
-    activityData.forEach(item => {
-      Activity.create(item);
-    })
-  }
-})
+Activity.findOne()
+  .then(res => {
+    if (!res) {
+      activityData.forEach(item => {
+        Activity.create(item);
+      })
+    }
+  })
+  .catch(err => {
+    console.log(err);
+  })
 
 export default Activity;

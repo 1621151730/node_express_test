@@ -20,10 +20,14 @@ DeliverySchema.index({ id: 1 });
 
 const Delivery = mongoose.model("Delivery", DeliverySchema);
 
-Delivery.findOne((err, data) => {
-  if (!data) {
-    Delivery.create(deliveryData);
-  }
-})
+Delivery.findOne()
+  .then(res => {
+    if (!res) {
+      Delivery.create(deliveryData);
+    }
+  })
+  .catch(err => {
+    console.log(err);
+  })
 
 export default Delivery;
